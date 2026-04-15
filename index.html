@@ -103,19 +103,18 @@ async function send() {
 
   if (!message) return;
 
-  // Show user message
+  // user message
   chat.innerHTML += `<div class="message user">🧑 ${message}</div>`;
+  input.value = "";
 
-  // Typing indicator
+  // typing
   const typing = document.createElement("div");
-  typing.className = "message bot";
   typing.id = "typing";
   typing.innerText = "🤖 Azzo is typing...";
   chat.appendChild(typing);
 
-  chat.scrollTop = chat.scrollHeight;
-
-  const res = await fetch("http://localhost:3000/chat", {
+  // request
+  const response = await fetch("/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -123,16 +122,17 @@ async function send() {
     body: JSON.stringify({ message })
   });
 
-  const data = await res.json();
+  const data = await response.json();
 
+  // remove typing
   document.getElementById("typing").remove();
 
+  // bot reply
   chat.innerHTML += `<div class="message bot">🤖 ${data.reply}</div>`;
-
-  input.value = "";
 
   chat.scrollTop = chat.scrollHeight;
 }
+
 </script>
 
 </body>
