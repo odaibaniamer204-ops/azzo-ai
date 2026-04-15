@@ -1,7 +1,7 @@
 {
   "name": "azzo-ai",
   "version": "1.0.0",
-  "description": "",
+  "description": "deploy fix",
   "main": "server.js",
   "type": "module",
 
