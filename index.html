@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Azzo AI</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #343541;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 15px;
+      background: #202123;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: #4e8cff;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: #444654;
+    }
+
+    #inputArea {
+      display: flex;
+      padding: 10px;
+      background: #202123;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    button {
+      margin-left: 10px;
+      padding: 10px 15px;
+      background: #4e8cff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3a6fd9;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>🤖 Azzo AI</header>
+
+<div id="chat"></div>
+
+<div id="inputArea">
+  <input id="input" placeholder="Ask anything..." />
+  <button onclick="send()">Send</button>
+</div>
+
+<script>
+document.getElementById("input").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    send();
+  }
+});
+
+async function send() {
+  const input = document.getElementById("input");
+  const message = input.value.trim();
+  const chat = document.getElementById("chat");
+
+  if (!message) return;
+
+  // Show user message
+  chat.innerHTML += `<div class="message user">🧑 ${message}</div>`;
+
+  // Typing indicator
+  const typing = document.createElement("div");
+  typing.className = "message bot";
+  typing.id = "typing";
+  typing.innerText = "🤖 Azzo is typing...";
+  chat.appendChild(typing);
+
+  chat.scrollTop = chat.scrollHeight;
+
+  const res = await fetch("http://localhost:3000/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("typing").remove();
+
+  chat.innerHTML += `<div class="message bot">🤖 ${data.reply}</div>`;
+
+  input.value = "";
+
+  chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
