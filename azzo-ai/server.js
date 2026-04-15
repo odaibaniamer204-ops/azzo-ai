@@ -2,13 +2,18 @@ import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 const conversations = {};
 
@@ -88,6 +93,9 @@ You are Azzo, a smart AI assistant.
 // Chat Endpoint
 // =======================
 app.post("/chat", async (req, res) => {
+  app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+  });
   const { message } = req.body;
   const userId = "default";
 
