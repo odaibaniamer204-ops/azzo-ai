@@ -21,7 +21,7 @@ app.use(express.static(__dirname));
 // Root route (IMPORTANT)
 // =======================
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "../index.html"));
 });
 
 // =======================
