@@ -5,8 +5,10 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// Fix __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 dotenv.config();
 
 const app = express();
@@ -15,10 +17,20 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// =======================
+// Root route (IMPORTANT)
+// =======================
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// =======================
+// Memory
+// =======================
 const conversations = {};
 
 // =======================
-// Detect user intent (mode)
+// Detect user intent
 // =======================
 function detectMode(message) {
   const text = message.toLowerCase();
@@ -43,7 +55,7 @@ function detectMode(message) {
 }
 
 // =======================
-// System prompt by mode
+// System prompt
 // =======================
 function getSystemPrompt(mode) {
   if (mode === "tutor") {
@@ -55,8 +67,6 @@ You are Azzo, an expert programming tutor.
 - Keep answers clear
 - Ask a follow-up question
 - Give small exercises
-
-Your goal is to teach, not just answer.
 `;
   }
 
@@ -64,7 +74,7 @@ Your goal is to teach, not just answer.
     return `
 You are an expert software engineer.
 
-- Write clean and correct code
+- Write clean code
 - Fix bugs directly
 - Be concise
 - Use best practices
@@ -77,7 +87,7 @@ You are a professional translator.
 
 - Translate accurately
 - Keep meaning and tone
-- Do not add extra explanation
+- No extra explanation
 `;
   }
 
@@ -90,12 +100,9 @@ You are Azzo, a smart AI assistant.
 }
 
 // =======================
-// Chat Endpoint
+// Chat endpoint
 // =======================
 app.post("/chat", async (req, res) => {
-  app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-  });
   const { message } = req.body;
   const userId = "default";
 
@@ -107,15 +114,9 @@ app.post("/chat", async (req, res) => {
   }
 
   const messages = [
-    {
-      role: "system",
-      content: systemPrompt
-    },
+    { role: "system", content: systemPrompt },
     ...conversations[userId],
-    {
-      role: "user",
-      content: message
-    }
+    { role: "user", content: message }
   ];
 
   try {
@@ -124,7 +125,7 @@ app.post("/chat", async (req, res) => {
       {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -136,12 +137,10 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    console.log("FULL RESPONSE:", data);
-
     if (!data.choices) {
-        return res.json({
-            reply: "Error from AI: " + JSON.stringify(data)
-        });
+      return res.json({
+        reply: "Error from AI: " + JSON.stringify(data)
+      });
     }
 
     const reply = data.choices[0].message.content;
@@ -166,7 +165,4 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
-});
-app.get("/", (req, res) => {
-  res.send("Server is runnig 🚀");
 });
